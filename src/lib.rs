@@ -193,10 +193,12 @@ pub mod class_prelude {
 }
 
 fn _ensure_sync() {
+    #[allow(unused_imports)]
     use crate::bus::{PollResult, UsbBus, UsbBusAllocator};
     use crate::class_prelude::*;
 
     struct DummyBus<'a> {
+        #[allow(dead_code)]
         a: &'a str,
     }
 
@@ -237,10 +239,12 @@ fn _ensure_sync() {
     }
 
     struct DummyClass<'a, B: UsbBus> {
+        #[allow(dead_code)]
         ep: crate::endpoint::EndpointIn<'a, B>,
     }
 
     impl<B: UsbBus> DummyClass<'_, B> {
+        #[allow(dead_code)]
         fn new(alloc: &UsbBusAllocator<B>) -> DummyClass<'_, B> {
             DummyClass { ep: alloc.bulk(64) }
         }

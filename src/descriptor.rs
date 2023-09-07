@@ -294,14 +294,20 @@ impl DescriptorWriter<'_> {
 
         let mps = endpoint.max_packet_size();
 
+        #[cfg(not(feature = "synchronization-type"))]
+        let attributes = endpoint.ep_type() as u8;
+
+        #[cfg(feature = "synchronization-type")]
+        let attributes = endpoint.ep_type() as u8 | endpoint.ep_sync_type() as u8;
+
         self.write(
             descriptor_type::ENDPOINT,
             &[
-                endpoint.address().into(), // bEndpointAddress
-                endpoint.ep_type() as u8,  // bmAttributes
+                endpoint.address().into(),  // bEndpointAddress
+                attributes,                 // bmAttributes
                 mps as u8,
-                (mps >> 8) as u8,    // wMaxPacketSize
-                endpoint.interval(), // bInterval
+                (mps >> 8) as u8,           // wMaxPacketSize
+                endpoint.interval(),        // bInterval
             ],
         )?;
 
@@ -328,14 +334,20 @@ impl DescriptorWriter<'_> {
 
         let mps = endpoint.max_packet_size();
 
+        #[cfg(not(feature = "synchronization-type"))]
+        let attributes = endpoint.ep_type() as u8;
+
+        #[cfg(feature = "synchronization-type")]
+        let attributes = endpoint.ep_type() as u8 | endpoint.ep_sync_type() as u8;
+
         self.write_iter(
             descriptor_type::ENDPOINT,
             [
-                endpoint.address().into(), // bEndpointAddress
-                endpoint.ep_type() as u8,  // bmAttributes
+                endpoint.address().into(),  // bEndpointAddress
+                attributes,                 // bmAttributes
                 mps as u8,
-                (mps >> 8) as u8,    // wMaxPacketSize
-                endpoint.interval(), // bInterval
+                (mps >> 8) as u8,           // wMaxPacketSize
+                endpoint.interval(),        // bInterval
             ]
             .iter()
             .cloned()

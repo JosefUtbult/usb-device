@@ -74,6 +74,8 @@ impl<B: UsbBus> UsbDevice<'_, B> {
             .alloc(
                 Some(0x00.into()),
                 EndpointType::Control,
+                #[cfg(feature = "synchronization-type")]
+                None,
                 config.max_packet_size_0 as u16,
                 0,
             )
@@ -83,6 +85,8 @@ impl<B: UsbBus> UsbDevice<'_, B> {
             .alloc(
                 Some(0x80.into()),
                 EndpointType::Control,
+                #[cfg(feature = "synchronization-type")]
+                None,
                 config.max_packet_size_0 as u16,
                 0,
             )

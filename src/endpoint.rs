@@ -46,12 +46,24 @@ pub enum EndpointType {
     Interrupt = 0b11,
 }
 
+/// Synchronization type used in tandem with `Endpoint::Isochronous` endpoints
+#[repr(u8)]
+#[derive(Copy, Clone, Eq, PartialEq, Debug)]
+pub enum SyncType {
+    /// None synchronized Isochronous endpoint
+    NoSync = 0b000,
+    /// Asynchronous synchronization for an Isochronous endpoint
+    Asynchronous = 0b100
+}
+
 /// Handle for a USB endpoint. The endpoint direction is constrained by the `D` type argument, which
 /// must be either `In` or `Out`.
 pub struct Endpoint<'a, B: UsbBus, D: EndpointDirection> {
     bus_ptr: &'a AtomicPtr<B>,
     address: EndpointAddress,
     ep_type: EndpointType,
+    #[cfg(feature = "synchronization-type")]
+    sync_type: Option<SyncType>,
     max_packet_size: u16,
     interval: u8,
     _marker: PhantomData<D>,
@@ -62,6 +74,8 @@ impl<B: UsbBus, D: EndpointDirection> Endpoint<'_, B, D> {
         bus_ptr: &'a AtomicPtr<B>,
         address: EndpointAddress,
         ep_type: EndpointType,
+        #[cfg(feature = "synchronization-type")]
+        sync_type: Option<SyncType>,
         max_packet_size: u16,
         interval: u8,
     ) -> Endpoint<'_, B, D> {
@@ -69,6 +83,8 @@ impl<B: UsbBus, D: EndpointDirection> Endpoint<'_, B, D> {
             bus_ptr,
             address,
             ep_type,
+            #[cfg(feature = "synchronization-type")]
+            sync_type,
             max_packet_size,
             interval,
             _marker: PhantomData,
@@ -92,6 +108,15 @@ impl<B: UsbBus, D: EndpointDirection> Endpoint<'_, B, D> {
     /// Gets the endpoint transfer type.
     pub fn ep_type(&self) -> EndpointType {
         self.ep_type
+    }
+
+    /// Gets the endpoint synchronization type
+    #[cfg(feature = "synchronization-type")]
+    pub fn ep_sync_type(&self) -> SyncType {
+        match self.sync_type {
+            Some(s) => s,
+            None => SyncType::NoSync
+        }
     }
 
     /// Gets the maximum packet size for the endpoint.
